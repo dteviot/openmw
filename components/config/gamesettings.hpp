@@ -59,7 +59,7 @@ namespace Config
 
         bool hasMaster();
 
-        QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
+        QStringList values(const QString &key, const QStringList &defaultValues = QStringList()) const;
 
         bool readFile(QTextStream &stream);
         bool readFile(QTextStream &stream, QMap<QString, QString> &settings);

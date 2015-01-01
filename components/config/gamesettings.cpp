@@ -82,7 +82,7 @@ void Config::GameSettings::validatePaths()
     }
 }
 
-QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues)
+QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues) const
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);

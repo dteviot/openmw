@@ -17,7 +17,7 @@ namespace Config
         SettingsBase() { mMultiValue = false; }
         ~SettingsBase() {}
 
-        inline QString value(const QString &key, const QString &defaultValue = QString())
+        inline QString value(const QString &key, const QString &defaultValue = QString()) const
         {
             return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
         }
