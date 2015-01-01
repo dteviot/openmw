@@ -232,6 +232,8 @@ bool Launcher::MainDialog::reloadSettings()
     if (!setupGameSettings())
         return false;
 
+    mLauncherSettings.setContentList(mGameSettings);
+
     if (!setupGraphicsSettings())
         return false;
 

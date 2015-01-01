@@ -212,11 +212,8 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
             qDebug() << "Profile " << profile << files;
 
             // Doesn't quite work right now
-            mLauncherSettings.setValue(QLatin1String(Config::LauncherSettings::sCurrentProfileKey), profile);
-
-            foreach (const QString &file, files) {
-                mLauncherSettings.setMultiValue(QLatin1String("Profiles/") + profile + QLatin1String("/content"), file);
-            }
+            mLauncherSettings.setCurrentContentListName(profile);
+            mLauncherSettings.setContentList(profile, mLauncherSettings.reverse(files));
 
             mGameSettings.remove(QLatin1String(Config::GameSettings::sContentKey));
         }
@@ -234,7 +231,7 @@ void Launcher::SettingsPage::updateOkButton(const QString &text)
          return;
     }
 
-    const QStringList profiles(mLauncherSettings.subKeys(QString("Profiles/")));
+    const QStringList profiles(mLauncherSettings.getContentLists());
 
     (profiles.contains(text))
             ? mProfileDialog->setOkButtonEnabled(false)

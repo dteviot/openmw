@@ -18,27 +18,6 @@ Config::LauncherSettings::~LauncherSettings()
 {
 }
 
-QStringList Config::LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
-{
-    QMap<QString, QString> settings = SettingsBase::getSettings();
-
-    if (flags == Qt::MatchExactly)
-        return settings.values(key);
-
-    QStringList result;
-
-    if (flags == Qt::MatchStartsWith) {
-        QStringList keys = settings.keys();
-
-        foreach (const QString &currentKey, keys) {
-            if (currentKey.startsWith(key))
-                result.append(settings.value(currentKey));
-        }
-    }
-
-    return result;
-}
-
 QStringList Config::LauncherSettings::subKeys(const QString &key)
 {
     QMap<QString, QString> settings = SettingsBase::getSettings();
@@ -68,6 +47,7 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
     result.removeDuplicates();
     return result;
 }
+
 
 bool Config::LauncherSettings::writeFile(QTextStream &stream)
 {
@@ -107,3 +87,89 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
     return true;
 
 }
+
+/// \return names of all Content Lists in the launcher's .cfg file. 
+QStringList Config::LauncherSettings::getContentLists()
+{
+    return subKeys(QString("Profiles/"));
+}
+
+/// \return key to use to get the files in the specified Content List
+QString Config::LauncherSettings::makeContentListKey(const QString& contentListName)
+{
+    return QString("Profiles/") + contentListName + QString("/content");
+}
+
+void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
+{
+    // obtain content list from game settings (if present)
+    const QStringList files(gameSettings.values(QLatin1String(Config::GameSettings::sContentKey)));
+
+    // if any existing profile in launcher matches the content list, make that profile the default
+    foreach(const QString &listName, getContentLists())
+    {
+        QStringList contentList = getContentListFiles(listName);
+        if (contentList.count() == files.count())
+        {
+            bool matchFound = true;
+            for (int i = 0; i < contentList.count(); ++i)
+            {
+                if (contentList.at(i) != files.at(i))
+                {
+                    matchFound = false;
+                    break;
+                }
+            }
+            if (matchFound)
+            {
+                setCurrentContentListName(listName);
+                return;
+            }
+        }
+    }
+
+    // otherwise, add content list
+    QString newContentListName("Autocreated");
+    setCurrentContentListName(newContentListName);
+    setContentList(newContentListName, reverse(files));
+}
+
+void Config::LauncherSettings::removeContentList(const QString &contentListName)
+{
+    remove(makeContentListKey(contentListName));
+}
+
+void Config::LauncherSettings::setCurrentContentListName(const QString &contentListName)
+{
+    remove(QString(sCurrentProfileKey));
+    setValue(QString(sCurrentProfileKey), contentListName);
+}
+
+void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& fileNames)
+{
+    removeContentList(contentListName);
+    QString key = Config::LauncherSettings::makeContentListKey(contentListName);
+    foreach(const QString& fileName, fileNames)
+    {
+        setMultiValue(key, fileName);
+    }
+}
+
+QString Config::LauncherSettings::currentContentListName() const
+{
+    return value(QString(sCurrentProfileKey));
+}
+
+QStringList Config::LauncherSettings::getContentListFiles(const QString& contentListName)
+{
+    return getSettings().values(Config::LauncherSettings::makeContentListKey(contentListName));
+}
+
+QStringList Config::LauncherSettings::reverse(const QStringList& toReverse)
+{
+    QStringList result;
+    result.reserve(toReverse.size());
+    std::reverse_copy(toReverse.begin(), toReverse.end(), std::back_inserter(result));
+    return result;
+}
+

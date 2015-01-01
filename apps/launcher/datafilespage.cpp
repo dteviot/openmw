@@ -82,8 +82,8 @@ bool Launcher::DataFilesPage::loadSettings()
     paths.insert (0, mDataLocal);
     PathIterator pathIterator (paths);
 
-    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString currentProfile = mLauncherSettings.getSettings().value(Config::LauncherSettings::sCurrentProfileKey);
+    QStringList profiles = mLauncherSettings.getContentLists();
+    QString currentProfile = mLauncherSettings.currentContentListName();
 
     qDebug() << "current profile is: " << currentProfile;
 
@@ -101,7 +101,7 @@ bool Launcher::DataFilesPage::loadSettings()
 
 QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
 {
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/content"), Qt::MatchExactly);
+    QStringList files = mLauncherSettings.getContentListFiles(profileName);
     QStringList filepaths;
 
     // mLauncherSettings.values() returns the files in reverse load order
@@ -128,24 +128,22 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
    //retrieve the files selected for the profile
    ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
 
-   removeProfile (profileName);
-
    mGameSettings.remove(Config::GameSettings::sContentKey);
 
     //set the value of the current profile (not necessarily the profile being saved!)
-    mLauncherSettings.setValue(QString(Config::LauncherSettings::sCurrentProfileKey), ui.profilesComboBox->currentText());
+    mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());
 
+    QStringList fileNames;
     foreach(const ContentSelectorModel::EsmFile *item, items) {
-        mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/content"), item->fileName());
+        fileNames.append(item->fileName());
         mGameSettings.setMultiValue(Config::GameSettings::sContentKey, item->fileName());
     }
-
+    mLauncherSettings.setContentList(profileName, fileNames);
 }
 
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
-    mLauncherSettings.remove(QString("Profiles/") + profile);
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/content"));
+    mLauncherSettings.removeContentList(profile);
 }
 
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
@@ -233,7 +231,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
 
     saveSettings();
 
-    mLauncherSettings.setValue(QString(Config::LauncherSettings::sCurrentProfileKey), profile);
+    mLauncherSettings.setCurrentContentListName(profile);
 
     addProfile(profile, true);
     mSelector->clearCheckStates();
