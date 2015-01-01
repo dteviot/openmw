@@ -150,9 +150,6 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        if (i.key() == QLatin1String(Config::GameSettings::sContentKey))
-            continue;
-
         // Quote paths with spaces
         if (i.key() == QLatin1String("data")
             || i.key() == QLatin1String("data-local")
@@ -170,11 +167,6 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 
         stream << i.key() << "=" << i.value() << "\n";
 
-    }
-
-    QStringList content = mUserSettings.values(QString(Config::GameSettings::sContentKey));
-    for (int i = content.count(); i--;) {
-        stream << "content=" << content.at(i) << "\n";
     }
 
     return true;
