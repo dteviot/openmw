@@ -7,6 +7,9 @@
 
 #include <QDebug>
 
+const char Config::LauncherSettings::sCurrentProfileKey[] = "Profiles/currentprofile";
+const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
+
 Config::LauncherSettings::LauncherSettings()
 {
 }

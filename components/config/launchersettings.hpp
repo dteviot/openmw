@@ -16,6 +16,8 @@ namespace Config
 
         bool writeFile(QTextStream &stream);
 
+        static const char sCurrentProfileKey[];
+        static const char sLauncherConfigFileName[];
     };
 }
 #endif // LAUNCHERSETTINGS_HPP

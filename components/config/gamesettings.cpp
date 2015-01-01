@@ -26,6 +26,7 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
+const char Config::GameSettings::sContentKey[] = "content";
 
 Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
@@ -149,7 +150,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        if (i.key() == QLatin1String("content"))
+        if (i.key() == QLatin1String(Config::GameSettings::sContentKey))
             continue;
 
         // Quote paths with spaces
@@ -171,7 +172,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 
     }
 
-    QStringList content = mUserSettings.values(QString("content"));
+    QStringList content = mUserSettings.values(QString(Config::GameSettings::sContentKey));
     for (int i = content.count(); i--;) {
         stream << "content=" << content.at(i) << "\n";
     }
@@ -182,7 +183,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 bool Config::GameSettings::hasMaster()
 {
     bool result = false;
-    QStringList content = mSettings.values(QString("content"));
+    QStringList content = mSettings.values(QString(Config::GameSettings::sContentKey));
     for (int i = 0; i < content.count(); ++i) {
         if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
             result = true;

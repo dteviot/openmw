@@ -67,6 +67,8 @@ namespace Config
 
         bool writeFile(QTextStream &stream);
 
+        static const char sContentKey[];
+
     private:
         Files::ConfigurationManager &mCfgMgr;
 

@@ -83,7 +83,7 @@ bool Launcher::DataFilesPage::loadSettings()
     PathIterator pathIterator (paths);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString currentProfile = mLauncherSettings.getSettings().value("Profiles/currentprofile");
+    QString currentProfile = mLauncherSettings.getSettings().value(Config::LauncherSettings::sCurrentProfileKey);
 
     qDebug() << "current profile is: " << currentProfile;
 
@@ -130,14 +130,14 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
 
    removeProfile (profileName);
 
-    mGameSettings.remove(QString("content"));
+   mGameSettings.remove(Config::GameSettings::sContentKey);
 
     //set the value of the current profile (not necessarily the profile being saved!)
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), ui.profilesComboBox->currentText());
+    mLauncherSettings.setValue(QString(Config::LauncherSettings::sCurrentProfileKey), ui.profilesComboBox->currentText());
 
     foreach(const ContentSelectorModel::EsmFile *item, items) {
         mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/content"), item->fileName());
-        mGameSettings.setMultiValue(QString("content"), item->fileName());
+        mGameSettings.setMultiValue(Config::GameSettings::sContentKey, item->fileName());
     }
 
 }
@@ -233,7 +233,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
 
     saveSettings();
 
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
+    mLauncherSettings.setValue(QString(Config::LauncherSettings::sCurrentProfileKey), profile);
 
     addProfile(profile, true);
     mSelector->clearCheckStates();
