@@ -224,6 +224,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
     if (profile.isEmpty())
         return;
 
+    // save changes to the old profile
     saveSettings();
 
     mLauncherSettings.setCurrentContentListName(profile);
@@ -233,7 +234,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
 
     mSelector->setGameFile();
 
-    saveSettings();
+    saveSettings();  // I suspect this is not needed.
 
     emit signalProfileChanged (ui.profilesComboBox->findText(profile));
 }
@@ -262,14 +263,12 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
 
     // this should work since the Default profile can't be deleted and is always index 0
     int next = ui.profilesComboBox->currentIndex()-1;
+
+    // changing the selected item forces a loadSettings()
     ui.profilesComboBox->setCurrentIndex(next);
 
     removeProfile(profile);
     ui.profilesComboBox->removeItem(ui.profilesComboBox->findText(profile));
-
-    saveSettings();
-
-    loadSettings();
 
     checkForDefaultProfile();
 }
