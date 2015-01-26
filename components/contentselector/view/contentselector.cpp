@@ -25,7 +25,7 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
     QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
-    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon);
+    mAllPluginsContentModel = new ContentSelectorModel::AllPluginsContentModel(this, warningIcon);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -35,7 +35,7 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     mGameFileProxyModel = new QSortFilterProxyModel(this);
     mGameFileProxyModel->setFilterRegExp(QString::number((int)ContentSelectorModel::ContentType_GameFile));
     mGameFileProxyModel->setFilterRole (Qt::UserRole);
-    mGameFileProxyModel->setSourceModel (mContentModel);
+    mGameFileProxyModel->setSourceModel (mAllPluginsContentModel);
 
     ui.gameFileView->setPlaceholderText(QString("Select a game file..."));
     ui.gameFileView->setModel(mGameFileProxyModel);
@@ -55,12 +55,12 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     mAddonProxyModel->setFilterRegExp (QString::number((int)ContentSelectorModel::ContentType_Addon));
     mAddonProxyModel->setFilterRole (Qt::UserRole);
     mAddonProxyModel->setDynamicSortFilter (true);
-    mAddonProxyModel->setSourceModel (mContentModel);
+    mAddonProxyModel->setSourceModel (mAllPluginsContentModel);
 
     ui.addonView->setModel(mAddonProxyModel);
 
     connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
-    connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
+    connect(mAllPluginsContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -69,7 +69,7 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &
 
     foreach (const QString &filepath, fileList)
     {
-        const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
+        const ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->item(filepath);
         if (file && file->isGameFile())
         {
             setGameFile (filepath);
@@ -86,11 +86,11 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
 
     if (!filename.isEmpty())
     {
-        const ContentSelectorModel::EsmFile *file = mContentModel->item (filename);
+        const ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->item (filename);
         index = ui.gameFileView->findText (file->fileName());
 
         //verify that the current index is also checked in the model
-        if (!mContentModel->setCheckState(filename, true))
+        if (!mAllPluginsContentModel->setCheckState(filename, true))
         {
             //throw error in case file not found?
             return;
@@ -102,7 +102,7 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
 
 void ContentSelectorView::ContentSelector::clearCheckStates()
 {
-    mContentModel->uncheckAll();
+    mAllPluginsContentModel->uncheckAll();
 }
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
@@ -112,26 +112,26 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList &lis
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
-        mContentModel->setContentList(list, true);
+        mAllPluginsContentModel->setContentList(list, true);
 }
 
 ContentSelectorModel::ContentFileList
         ContentSelectorView::ContentSelector::selectedFiles() const
 {
-    if (!mContentModel)
+    if (!mAllPluginsContentModel)
         return ContentSelectorModel::ContentFileList();
 
-    return mContentModel->checkedItems();
+    return mAllPluginsContentModel->checkedItems();
 }
 
 void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 {
-    mContentModel->addFiles(path);
+    mAllPluginsContentModel->addFiles(path);
 
     if (ui.gameFileView->currentIndex() != -1)
         ui.gameFileView->setCurrentIndex(-1);
 
-    mContentModel->uncheckAll();
+    mAllPluginsContentModel->uncheckAll();
 }
 
 QString ContentSelectorView::ContentSelector::currentFile() const
@@ -141,8 +141,8 @@ QString ContentSelectorView::ContentSelector::currentFile() const
     if (!currentIdx.isValid())
         return ui.gameFileView->currentText();
 
-    QModelIndex idx = mContentModel->index(mAddonProxyModel->mapToSource(currentIdx).row(), 0, QModelIndex());
-    return mContentModel->data(idx, Qt::DisplayRole).toString();
+    QModelIndex idx = mAllPluginsContentModel->index(mAddonProxyModel->mapToSource(currentIdx).row(), 0, QModelIndex());
+    return mAllPluginsContentModel->data(idx, Qt::DisplayRole).toString();
 }
 
 void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int index)
@@ -163,7 +163,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         model->setData(model->index(index, 0), true, Qt::UserRole + 1);
-        mContentModel->checkForLoadOrderErrors();
+        mAllPluginsContentModel->checkForLoadOrderErrors();
     }
 
     if (proxy)
@@ -176,13 +176,13 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QMo
 {
     QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
 
-    if (!mContentModel->isEnabled (sourceIndex))
+    if (!mAllPluginsContentModel->isEnabled (sourceIndex))
         return;
 
     Qt::CheckState checkState = Qt::Unchecked;
 
-    if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() == Qt::Unchecked)
+    if (mAllPluginsContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() == Qt::Unchecked)
         checkState = Qt::Checked;
 
-    mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
+    mAllPluginsContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
 }
