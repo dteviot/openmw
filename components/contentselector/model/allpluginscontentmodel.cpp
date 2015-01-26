@@ -113,7 +113,7 @@ Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIn
 
     //game files can always be checked
     if (file->isGameFile())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     Qt::ItemFlags returnFlags;
     bool allDependenciesFound = true;
@@ -152,7 +152,7 @@ Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIn
     if (gamefileChecked)
     {
         if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
         else
             returnFlags = Qt::ItemIsSelectable;
     }
@@ -214,14 +214,6 @@ QVariant ContentSelectorModel::AllPluginsContentModel::data(const QModelIndex &i
         return toolTip(file);
     }
 
-    case Qt::CheckStateRole:
-    {
-        if (file->isGameFile())
-            return QVariant();
-
-        return mCheckStates[file->filePath()];
-    }
-
     case Qt::UserRole:
     {
         if (file->isGameFile())
@@ -278,42 +270,6 @@ bool ContentSelectorModel::AllPluginsContentModel::setData(const QModelIndex &in
         }
         break;
 
-        case Qt::CheckStateRole:
-        {
-            int checkValue = value.toInt();
-            bool setState = false;
-            if ((checkValue==Qt::Checked) && !isChecked(file->filePath()))
-            {
-                setState = true;
-                success = true;
-            }
-            else if ((checkValue == Qt::Checked) && isChecked (file->filePath()))
-                setState = true;
-            else if (checkValue == Qt::Unchecked)
-                setState = true;
-
-            if (setState)
-            {
-                setCheckState(file->filePath(), success);
-                emit dataChanged(index, index);
-                checkForLoadOrderErrors();
-            }
-            else
-                return success;
-
-
-            foreach (EsmFile *file, mFiles)
-            {
-                if (file->gameFiles().contains(fileName, Qt::CaseInsensitive))
-                {
-                    QModelIndex idx = indexFromItem(file);
-                    emit dataChanged(idx, idx);
-                }
-            }
-
-            success =  true;
-        }
-        break;
     }
 
     return success;
