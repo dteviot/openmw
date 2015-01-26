@@ -26,6 +26,7 @@ void ContentSelectorView::ContentSelector::buildContentModel()
 {
     QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
     mAllPluginsContentModel = new ContentSelectorModel::AllPluginsContentModel(this, warningIcon);
+    mLoadPluginsContentModel = new ContentSelectorModel::LoadPluginsContentModel(this, warningIcon);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -51,16 +52,26 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 {
     ui.addonView->setVisible (true);
 
-    mAddonProxyModel = new QSortFilterProxyModel(this);
-    mAddonProxyModel->setFilterRegExp (QString::number((int)ContentSelectorModel::ContentType_Addon));
-    mAddonProxyModel->setFilterRole (Qt::UserRole);
-    mAddonProxyModel->setDynamicSortFilter (true);
-    mAddonProxyModel->setSourceModel (mAllPluginsContentModel);
-
-    ui.addonView->setModel(mAddonProxyModel);
+    mAllPluginsProxyModel = CreateProxy(ui.addonView, mAllPluginsContentModel);
+    mLoadPluginsProxyModel = CreateProxy(ui.addonView2, mLoadPluginsContentModel);
 
     connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
     connect(mAllPluginsContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
+}
+
+QSortFilterProxyModel* ContentSelectorView::ContentSelector::CreateProxy(QTableView* tableView, QAbstractTableModel* contentModel)
+{
+    tableView->setVisible(true);
+
+    QSortFilterProxyModel* proxy = new QSortFilterProxyModel(this);
+    proxy->setFilterRegExp(QString::number((int)ContentSelectorModel::ContentType_Addon));
+    proxy->setFilterRole(Qt::UserRole);
+    proxy->setDynamicSortFilter(true);
+    proxy->setSourceModel(contentModel);
+
+    tableView->setModel(proxy);
+    
+    return proxy;
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -141,7 +152,7 @@ QString ContentSelectorView::ContentSelector::currentFile() const
     if (!currentIdx.isValid())
         return ui.gameFileView->currentText();
 
-    QModelIndex idx = mAllPluginsContentModel->index(mAddonProxyModel->mapToSource(currentIdx).row(), 0, QModelIndex());
+    QModelIndex idx = mAllPluginsContentModel->index(mAllPluginsProxyModel->mapToSource(currentIdx).row(), 0, QModelIndex());
     return mAllPluginsContentModel->data(idx, Qt::DisplayRole).toString();
 }
 
@@ -174,7 +185,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex &index)
 {
-    QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
+    QModelIndex sourceIndex = mAllPluginsProxyModel->mapToSource (index);
 
     if (!mAllPluginsContentModel->isEnabled (sourceIndex))
         return;
