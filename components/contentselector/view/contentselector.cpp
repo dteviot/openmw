@@ -98,12 +98,8 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
         const ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->item (filename);
         index = ui.gameFileView->findText (file->fileName());
 
-        //verify that the current index is also checked in the model
-        if (!mAllPluginsContentModel->setCheckState(filename, true))
-        {
-            //throw error in case file not found?
-            return;
-        }
+        // may need to clone the game file into the list of files to load
+        moveToFilesToLoad(filename);
     }
 
     ui.gameFileView->setCurrentIndex(index);
@@ -122,18 +118,27 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList &lis
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
-        mAllPluginsContentModel->setContentList(list, true);
+    {
+        foreach(const QString &fileName, list)
+        {
+            moveToFilesToLoad(fileName);
+        }
+        mLoadPluginsContentModel->checkForLoadOrderErrors();
+    }
 }
 
-void ContentSelectorView::ContentSelector::addToFilesToLoad(const QString &fileName)
+void ContentSelectorView::ContentSelector::moveToFilesToLoad(const QString &fileName)
 {
-    const ContentSelectorModel::EsmFile *item = mAllPluginsContentModel->item(fileName);
-
+    ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->removeEsmFile(fileName);
+    if (file)
+    {
+        mLoadPluginsContentModel->addFile(file);
+    }
 }
 
-void ContentSelectorView::ContentSelector::removeFromFilesToLoad(const QString &fileName)
+void ContentSelectorView::ContentSelector::moveToFilesToNotLoad(const QString &fileName)
 {
-
+    mAllPluginsContentModel->addFile(mLoadPluginsContentModel->removeEsmFile(fileName));
 }
 
 ContentSelectorModel::ContentFileList

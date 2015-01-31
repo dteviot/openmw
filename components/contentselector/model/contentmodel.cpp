@@ -115,48 +115,8 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     Qt::ItemFlags returnFlags;
-    bool allDependenciesFound = true;
-    bool gamefileChecked = false;
 
-    //addon can be checked if its gamefile is and all other dependencies exist
-    foreach (const QString &fileName, file->gameFiles())
-    {
-        bool depFound = false;
-        foreach (EsmFile *dependency, mFiles)
-        {
-            //compare filenames only.  Multiple instances
-            //of the filename (with different paths) is not relevant here.
-            depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
-
-            if (!depFound)
-                continue;
-
-            if (!gamefileChecked)
-            {
-                if (isChecked (dependency->filePath()))
-                    gamefileChecked = (dependency->isGameFile());
-            }
-
-            // force it to iterate all files in cases where the current
-            // dependency is a game file to ensure that a later duplicate
-            // game file is / is not checked.
-            // (i.e., break only if it's not a gamefile or the game file has been checked previously)
-            if (gamefileChecked || !(dependency->isGameFile()))
-                break;
-        }
-
-        allDependenciesFound = allDependenciesFound && depFound;
-    }
-
-    if (gamefileChecked)
-    {
-        if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
-        else
-            returnFlags = Qt::ItemIsSelectable;
-    }
-
-    return returnFlags;
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
 }
 
 QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int role) const
@@ -377,6 +337,20 @@ bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt:
     return true;
 }
 
+ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::removeEsmFile(const QString& fileName)
+{
+    const EsmFile* tempFile = item(fileName);
+    EsmFile* retVal = NULL;
+    if (tempFile)
+    {
+        int index = indexFromItem(tempFile).row();
+        beginRemoveRows(QModelIndex(), index, index);
+        retVal = mFiles.takeAt(index);
+        endRemoveRows();
+    }
+    return retVal;
+}
+
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
@@ -441,31 +415,6 @@ bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
 bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) const
 {
     return mPluginsWithLoadOrderError.contains(file->filePath());
-}
-
-void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
-{
-    mPluginsWithLoadOrderError.clear();
-    int previousPosition = -1;
-    foreach (const QString &filepath, fileList)
-    {
-        if (setCheckState(filepath, isChecked))
-        {
-            // as necessary, move plug-ins in visible list to match sequence of supplied filelist
-            const EsmFile* file = item(filepath);
-            int filePosition = indexFromItem(file).row();
-            if (filePosition < previousPosition)
-            {
-                mFiles.move(filePosition, previousPosition);
-                emit dataChanged(index(filePosition, 0, QModelIndex()), index(previousPosition, 0, QModelIndex()));
-            }
-            else
-            {
-                previousPosition = filePosition;
-            }
-        }
-    }
-    checkForLoadOrderErrors();
 }
 
 void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()

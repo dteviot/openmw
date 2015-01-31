@@ -38,6 +38,11 @@ namespace ContentSelectorModel
         bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex());
         bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex());
 
+        /// Used when moving file between the two views
+        EsmFile* removeEsmFile(const QString& fileName);
+
+        void addFile(EsmFile *file);
+
         Qt::DropActions supportedDropActions() const;
         QStringList mimeTypes() const;
         QMimeData *mimeData(const QModelIndexList &indexes) const;
@@ -49,7 +54,6 @@ namespace ContentSelectorModel
         bool isEnabled (QModelIndex index) const;
         bool isChecked(const QString &filepath) const;
         bool setCheckState(const QString &filepath, bool isChecked);
-        void setContentList(const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
         void clearFiles();
 
@@ -60,7 +64,6 @@ namespace ContentSelectorModel
 
     protected:
 
-        void addFile(EsmFile *file);
         const EsmFile *item(int row) const;
         EsmFile *item(int row);
 
