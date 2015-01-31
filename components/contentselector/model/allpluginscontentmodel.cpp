@@ -104,7 +104,7 @@ QModelIndex ContentSelectorModel::AllPluginsContentModel::indexFromItem(const Es
 Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::NoItemFlags;
+        return Qt::NoItemFlags | Qt::ItemIsDropEnabled;
 
     const EsmFile *file = item(index.row());
 
