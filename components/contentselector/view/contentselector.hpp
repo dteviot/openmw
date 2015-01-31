@@ -4,7 +4,8 @@
 #include <QDialog>
 
 #include "ui_contentselector.h"
-#include "../model/contentmodel.hpp"
+#include "../model/allpluginscontentmodel.hpp"
+#include "../model/loadpluginscontentmodel.hpp"
 
 class QSortFilterProxyModel;
 
@@ -18,9 +19,11 @@ namespace ContentSelectorView
 
     protected:
 
-        ContentSelectorModel::ContentModel *mContentModel;
+        ContentSelectorModel::AllPluginsContentModel *mAllPluginsContentModel;
+        ContentSelectorModel::LoadPluginsContentModel *mLoadPluginsContentModel;
         QSortFilterProxyModel *mGameFileProxyModel;
-        QSortFilterProxyModel *mAddonProxyModel;
+        QSortFilterProxyModel *mAllPluginsProxyModel;
+        QSortFilterProxyModel *mLoadPluginsProxyModel;
 
     public:
 
@@ -52,6 +55,8 @@ namespace ContentSelectorView
         void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
+
+        QSortFilterProxyModel* CreateProxy(QTableView* tableView, QAbstractTableModel* contentModel);
 
     signals:
         void signalCurrentGamefileIndexChanged (int);

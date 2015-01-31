@@ -1,4 +1,4 @@
-#include "contentmodel.hpp"
+#include "allpluginscontentmodel.hpp"
 #include "esmfile.hpp"
 
 #include <stdexcept>
@@ -9,7 +9,7 @@
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
+ContentSelectorModel::AllPluginsContentModel::AllPluginsContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
     mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
@@ -22,13 +22,13 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningI
     uncheckAll();
 }
 
-ContentSelectorModel::ContentModel::~ContentModel()
+ContentSelectorModel::AllPluginsContentModel::~AllPluginsContentModel()
 {
     qDeleteAll(mFiles);
     mFiles.clear();
 }
 
-void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
+void ContentSelectorModel::AllPluginsContentModel::setEncoding(const QString &encoding)
 {
     mEncoding = encoding;
     if (encoding == QLatin1String("win1252"))
@@ -44,7 +44,7 @@ void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
         return; // This should never happen;
 }
 
-int ContentSelectorModel::ContentModel::columnCount(const QModelIndex &parent) const
+int ContentSelectorModel::AllPluginsContentModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
@@ -52,7 +52,7 @@ int ContentSelectorModel::ContentModel::columnCount(const QModelIndex &parent) c
     return mColumnCount;
 }
 
-int ContentSelectorModel::ContentModel::rowCount(const QModelIndex &parent) const
+int ContentSelectorModel::AllPluginsContentModel::rowCount(const QModelIndex &parent) const
 {
     if(parent.isValid())
         return 0;
@@ -60,7 +60,7 @@ int ContentSelectorModel::ContentModel::rowCount(const QModelIndex &parent) cons
     return mFiles.size();
 }
 
-const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::AllPluginsContentModel::item(int row) const
 {
     if (row >= 0 && row < mFiles.size())
         return mFiles.at(row);
@@ -68,14 +68,14 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(in
     return 0;
 }
 
-ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
+ContentSelectorModel::EsmFile *ContentSelectorModel::AllPluginsContentModel::item(int row)
 {
     if (row >= 0 && row < mFiles.count())
         return mFiles.at(row);
 
     return 0;
 }
-const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(const QString &name) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::AllPluginsContentModel::item(const QString &name) const
 {
     EsmFile::FileProperty fp = EsmFile::FileProperty_FileName;
 
@@ -90,7 +90,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
     return 0;
 }
 
-QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *item) const
+QModelIndex ContentSelectorModel::AllPluginsContentModel::indexFromItem(const EsmFile *item) const
 {
     //workaround: non-const pointer cast for calls from outside contentmodel/contentselector
     EsmFile *non_const_file_ptr = const_cast<EsmFile *>(item);
@@ -101,7 +101,7 @@ QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *ite
     return QModelIndex();
 }
 
-Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index) const
+Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -113,7 +113,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
 
     //game files can always be checked
     if (file->isGameFile())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     Qt::ItemFlags returnFlags;
     bool allDependenciesFound = true;
@@ -152,7 +152,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (gamefileChecked)
     {
         if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
         else
             returnFlags = Qt::ItemIsSelectable;
     }
@@ -160,7 +160,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     return returnFlags;
 }
 
-QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int role) const
+QVariant ContentSelectorModel::AllPluginsContentModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -214,14 +214,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         return toolTip(file);
     }
 
-    case Qt::CheckStateRole:
-    {
-        if (file->isGameFile())
-            return QVariant();
-
-        return mCheckStates[file->filePath()];
-    }
-
     case Qt::UserRole:
     {
         if (file->isGameFile())
@@ -239,7 +231,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     return QVariant();
 }
 
-bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ContentSelectorModel::AllPluginsContentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if(!index.isValid())
         return false;
@@ -278,48 +270,12 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         }
         break;
 
-        case Qt::CheckStateRole:
-        {
-            int checkValue = value.toInt();
-            bool setState = false;
-            if ((checkValue==Qt::Checked) && !isChecked(file->filePath()))
-            {
-                setState = true;
-                success = true;
-            }
-            else if ((checkValue == Qt::Checked) && isChecked (file->filePath()))
-                setState = true;
-            else if (checkValue == Qt::Unchecked)
-                setState = true;
-
-            if (setState)
-            {
-                setCheckState(file->filePath(), success);
-                emit dataChanged(index, index);
-                checkForLoadOrderErrors();
-            }
-            else
-                return success;
-
-
-            foreach (EsmFile *file, mFiles)
-            {
-                if (file->gameFiles().contains(fileName, Qt::CaseInsensitive))
-                {
-                    QModelIndex idx = indexFromItem(file);
-                    emit dataChanged(idx, idx);
-                }
-            }
-
-            success =  true;
-        }
-        break;
     }
 
     return success;
 }
 
-bool ContentSelectorModel::ContentModel::insertRows(int position, int rows, const QModelIndex &parent)
+bool ContentSelectorModel::AllPluginsContentModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
     if (parent.isValid())
         return false;
@@ -334,7 +290,7 @@ bool ContentSelectorModel::ContentModel::insertRows(int position, int rows, cons
     return true;
 }
 
-bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool ContentSelectorModel::AllPluginsContentModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
     if (parent.isValid())
         return false;
@@ -351,17 +307,17 @@ bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, cons
     return true;
 }
 
-Qt::DropActions ContentSelectorModel::ContentModel::supportedDropActions() const
+Qt::DropActions ContentSelectorModel::AllPluginsContentModel::supportedDropActions() const
 {
     return mDropActions;
 }
 
-QStringList ContentSelectorModel::ContentModel::mimeTypes() const
+QStringList ContentSelectorModel::AllPluginsContentModel::mimeTypes() const
 {
     return mMimeTypes;
 }
 
-QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &indexes) const
+QMimeData *ContentSelectorModel::AllPluginsContentModel::mimeData(const QModelIndexList &indexes) const
 {
     QByteArray encodedData;
 
@@ -379,7 +335,7 @@ QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &i
     return mimeData;
 }
 
-bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+bool ContentSelectorModel::AllPluginsContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -425,7 +381,7 @@ bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt:
     return true;
 }
 
-void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
+void ContentSelectorModel::AllPluginsContentModel::addFile(EsmFile *file)
 {
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
@@ -436,7 +392,7 @@ void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
     emit dataChanged (idx, idx);
 }
 
-void ContentSelectorModel::ContentModel::addFiles(const QString &path)
+void ContentSelectorModel::AllPluginsContentModel::addFiles(const QString &path)
 {
     QDir dir(path);
     QStringList filters;
@@ -489,7 +445,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     sortFiles();
 }
 
-void ContentSelectorModel::ContentModel::sortFiles()
+void ContentSelectorModel::AllPluginsContentModel::sortFiles()
 {
     //first, sort the model such that all dependencies are ordered upstream (gamefile) first.
     bool movedFiles = true;
@@ -526,7 +482,7 @@ void ContentSelectorModel::ContentModel::sortFiles()
     }
 }
 
-bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
+bool ContentSelectorModel::AllPluginsContentModel::isChecked(const QString& filepath) const
 {
     if (mCheckStates.contains(filepath))
         return (mCheckStates[filepath] == Qt::Checked);
@@ -534,17 +490,17 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) cons
     return false;
 }
 
-bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
+bool ContentSelectorModel::AllPluginsContentModel::isEnabled (QModelIndex index) const
 {
     return (flags(index) & Qt::ItemIsEnabled);
 }
 
-bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) const
+bool ContentSelectorModel::AllPluginsContentModel::isLoadOrderError(const EsmFile *file) const
 {
     return mPluginsWithLoadOrderError.contains(file->filePath());
 }
 
-void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
+void ContentSelectorModel::AllPluginsContentModel::setContentList(const QStringList &fileList, bool isChecked)
 {
     mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
@@ -569,7 +525,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileL
     checkForLoadOrderErrors();
 }
 
-void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
+void ContentSelectorModel::AllPluginsContentModel::checkForLoadOrderErrors()
 {
     for (int row = 0; row < mFiles.count(); ++row)
     {
@@ -586,7 +542,7 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
     }
 }
 
-QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
+QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::AllPluginsContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
 {
     QList<LoadOrderError> errors = QList<LoadOrderError>();
     foreach(QString dependentfileName, file->gameFiles())
@@ -612,7 +568,7 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
     return errors;
 }
 
-QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
+QString ContentSelectorModel::AllPluginsContentModel::toolTip(const EsmFile *file) const
 {
     if (isLoadOrderError(file))
     {
@@ -634,12 +590,12 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
     }
 }
 
-void ContentSelectorModel::ContentModel::refreshModel()
+void ContentSelectorModel::AllPluginsContentModel::refreshModel()
 {
     emit dataChanged (index(0,0), index(rowCount()-1,0));
 }
 
-bool ContentSelectorModel::ContentModel::setCheckState(const QString &filepath, bool checkState)
+bool ContentSelectorModel::AllPluginsContentModel::setCheckState(const QString &filepath, bool checkState)
 {
     if (filepath.isEmpty())
         return false;
@@ -698,7 +654,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &filepath, 
     return true;
 }
 
-ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checkedItems() const
+ContentSelectorModel::ContentFileList ContentSelectorModel::AllPluginsContentModel::checkedItems() const
 {
     ContentFileList list;
 
@@ -712,7 +668,7 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
     return list;
 }
 
-void ContentSelectorModel::ContentModel::uncheckAll()
+void ContentSelectorModel::AllPluginsContentModel::uncheckAll()
 {
     emit layoutAboutToBeChanged();
     mCheckStates.clear();

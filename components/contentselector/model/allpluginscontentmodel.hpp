@@ -1,5 +1,5 @@
-#ifndef CONTENTMODEL_HPP
-#define CONTENTMODEL_HPP
+#ifndef ALLPLUGINSCONTENTMODEL_HPP
+#define ALLPLUGINSCONTENTMODEL_HPP
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -19,12 +19,12 @@ namespace ContentSelectorModel
         ContentType_Addon
     };
 
-    class ContentModel : public QAbstractTableModel
+    class AllPluginsContentModel : public QAbstractTableModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent, QIcon warningIcon);
-        ~ContentModel();
+        explicit AllPluginsContentModel(QObject *parent, QIcon warningIcon);
+        ~AllPluginsContentModel();
 
         void setEncoding(const QString &encoding);
 
@@ -93,4 +93,4 @@ namespace ContentSelectorModel
         Qt::DropActions mDropActions;
     };
 }
-#endif // CONTENTMODEL_HPP
+#endif // ALLPLUGINSCONTENTMODEL_HPP
