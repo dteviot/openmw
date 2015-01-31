@@ -132,7 +132,9 @@ find_package(Qt4 COMPONENTS QtCore QtGui)
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
-        model/naturalsort model/allpluginscontentmodel
+        model/naturalsort 
+        model/contentmodel
+        model/allpluginscontentmodel
         model/loadpluginscontentmodel
         model/loadordererror
         view/combobox view/contentselector
