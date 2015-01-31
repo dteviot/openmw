@@ -224,9 +224,6 @@ QVariant ContentSelectorModel::AllPluginsContentModel::data(const QModelIndex &i
 
         break;
     }
-
-    case Qt::UserRole + 1:
-        return isChecked(file->filePath());
     }
     return QVariant();
 }
