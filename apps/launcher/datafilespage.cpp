@@ -88,6 +88,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 {
     QStringList paths = mGameSettings.getDataDirs();
 
+    mSelector->clearFiles();
     foreach(const QString &path, paths)
         mSelector->addFiles(path);
 

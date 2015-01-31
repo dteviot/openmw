@@ -76,8 +76,6 @@ QSortFilterProxyModel* ContentSelectorView::ContentSelector::CreateProxy(QTableV
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
 {
-    clearCheckStates();
-
     foreach (const QString &filepath, fileList)
     {
         const ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->item(filepath);
@@ -111,9 +109,10 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
     ui.gameFileView->setCurrentIndex(index);
 }
 
-void ContentSelectorView::ContentSelector::clearCheckStates()
+void ContentSelectorView::ContentSelector::clearFiles()
 {
-    mAllPluginsContentModel->uncheckAll();
+    mAllPluginsContentModel->clearFiles();
+    mLoadPluginsContentModel->clearFiles();
 }
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
@@ -124,6 +123,17 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList &lis
     }
     else
         mAllPluginsContentModel->setContentList(list, true);
+}
+
+void ContentSelectorView::ContentSelector::addToFilesToLoad(const QString &fileName)
+{
+    const ContentSelectorModel::EsmFile *item = mAllPluginsContentModel->item(fileName);
+
+}
+
+void ContentSelectorView::ContentSelector::removeFromFilesToLoad(const QString &fileName)
+{
+
 }
 
 ContentSelectorModel::ContentFileList
@@ -141,8 +151,6 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 
     if (ui.gameFileView->currentIndex() != -1)
         ui.gameFileView->setCurrentIndex(-1);
-
-    mAllPluginsContentModel->uncheckAll();
 }
 
 QString ContentSelectorView::ContentSelector::currentFile() const

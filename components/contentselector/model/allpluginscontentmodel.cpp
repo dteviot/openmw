@@ -19,7 +19,6 @@ ContentSelectorModel::AllPluginsContentModel::AllPluginsContentModel(QObject *pa
     mDropActions (Qt::CopyAction | Qt::MoveAction)
 {
     setEncoding ("win1252");
-    uncheckAll();
 }
 
 ContentSelectorModel::AllPluginsContentModel::~AllPluginsContentModel()
@@ -665,9 +664,10 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::AllPluginsContentMod
     return list;
 }
 
-void ContentSelectorModel::AllPluginsContentModel::uncheckAll()
+void ContentSelectorModel::AllPluginsContentModel::clearFiles()
 {
     emit layoutAboutToBeChanged();
-    mCheckStates.clear();
+    qDeleteAll(mFiles);
+    mFiles.clear();
     emit layoutChanged();
 }

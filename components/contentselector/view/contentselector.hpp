@@ -34,8 +34,10 @@ namespace ContentSelectorView
         void addFiles(const QString &path);
         void setProfileContent (const QStringList &fileList);
 
-        void clearCheckStates();
+        void clearFiles();
         void setContentList(const QStringList &list);
+        void addToFilesToLoad(const QString &fileName);
+        void removeFromFilesToLoad(const QString &fileName);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 

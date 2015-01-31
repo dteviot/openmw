@@ -20,7 +20,6 @@ ContentSelectorModel::LoadPluginsContentModel::LoadPluginsContentModel(QObject *
     mDropActions (Qt::CopyAction | Qt::MoveAction)
 {
     setEncoding ("win1252");
-    uncheckAll();
 }
 
 ContentSelectorModel::LoadPluginsContentModel::~LoadPluginsContentModel()
@@ -665,9 +664,10 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::LoadPluginsContentMo
     return list;
 }
 
-void ContentSelectorModel::LoadPluginsContentModel::uncheckAll()
+void ContentSelectorModel::LoadPluginsContentModel::clearFiles()
 {
     emit layoutAboutToBeChanged();
-    mCheckStates.clear();
+    qDeleteAll(mFiles);
+    mFiles.clear();
     emit layoutChanged();
 }

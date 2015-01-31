@@ -53,7 +53,7 @@ namespace ContentSelectorModel
         bool setCheckState(const QString &filepath, bool isChecked);
         void setContentList(const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
-        void uncheckAll();
+        void clearFiles();
 
         void refreshModel();
 
