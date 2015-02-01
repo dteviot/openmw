@@ -291,66 +291,6 @@ QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &i
     return mimeData;
 }
 
-bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
-{
-    if (action == Qt::IgnoreAction)
-        return true;
-
-    if (column > 0)
-        return false;
-
-    if (!data->hasFormat(mMimeType))
-        return false;
-
-    int beginRow = rowCount();
-
-    if (row != -1)
-        beginRow = row;
-
-    else if (parent.isValid())
-        beginRow = parent.row();
-
-    QByteArray encodedData = data->data(mMimeType);
-    QDataStream stream(&encodedData, QIODevice::ReadOnly);
-
-    while (!stream.atEnd())
-    {
-
-        QString value;
-        QStringList values;
-        QStringList gamefiles;
-
-        for (int i = 0; i < EsmFile::FileProperty_GameFile; ++i)
-        {
-            stream >> value;
-            values << value;
-        }
-
-        stream >> gamefiles;
-
-        insertRows(beginRow, 1);
-
-        QModelIndex idx = index(beginRow++, 0, QModelIndex());
-        setData(idx, QStringList() << values << gamefiles, Qt::EditRole);
-    }
-
-    return true;
-}
-
-ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::removeEsmFile(const QString& fileName)
-{
-    const EsmFile* tempFile = item(fileName);
-    EsmFile* retVal = NULL;
-    if (tempFile)
-    {
-        int index = indexFromItem(tempFile).row();
-        beginRemoveRows(QModelIndex(), index, index);
-        retVal = mFiles.takeAt(index);
-        endRemoveRows();
-    }
-    return retVal;
-}
-
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());

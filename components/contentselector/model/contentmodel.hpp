@@ -38,15 +38,11 @@ namespace ContentSelectorModel
         bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex());
         bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex());
 
-        /// Used when moving file between the two views
-        EsmFile* removeEsmFile(const QString& fileName);
-
         void addFile(EsmFile *file);
 
         Qt::DropActions supportedDropActions() const;
         QStringList mimeTypes() const;
         QMimeData *mimeData(const QModelIndexList &indexes) const;
-        bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
         QModelIndex indexFromItem(const EsmFile *item) const;
         const EsmFile *item(const QString &name) const;

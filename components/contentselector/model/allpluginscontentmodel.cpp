@@ -66,3 +66,17 @@ void ContentSelectorModel::AllPluginsContentModel::addFiles(const QString &path)
 
     sortFiles();
 }
+
+bool ContentSelectorModel::AllPluginsContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+{
+    // nothing to do, will just be someone trying drag & drop an in-use plug-in.
+    // no state change required.
+    return true;
+}
+
+bool ContentSelectorModel::AllPluginsContentModel::removeRows(int position, int rows, const QModelIndex &index)
+{
+    // nothing to do, will just be someone trying drag & drop an in-use plug-in.
+    // no state change required.
+    return true;
+}

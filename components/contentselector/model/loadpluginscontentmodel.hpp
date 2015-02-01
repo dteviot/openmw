@@ -15,6 +15,9 @@ namespace ContentSelectorModel
         Q_OBJECT
     public:
         explicit LoadPluginsContentModel(QObject *parent, QIcon warningIcon);
+
+        bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+        bool dropMimeData(const QMimeData *data, int row, const QModelIndex &parent);
     };
 }
 #endif // LOADPLUGINSCONTENTMODEL_HPP

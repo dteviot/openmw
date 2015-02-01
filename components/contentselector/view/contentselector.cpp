@@ -98,8 +98,7 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
         const ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->item (filename);
         index = ui.gameFileView->findText (file->fileName());
 
-        // may need to clone the game file into the list of files to load
-        moveToFilesToLoad(filename);
+        cloneToFilesToLoad(filename);
     }
 
     ui.gameFileView->setCurrentIndex(index);
@@ -121,24 +120,31 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList &lis
     {
         foreach(const QString &fileName, list)
         {
-            moveToFilesToLoad(fileName);
+            cloneToFilesToLoad(fileName);
         }
         mLoadPluginsContentModel->checkForLoadOrderErrors();
     }
 }
 
-void ContentSelectorView::ContentSelector::moveToFilesToLoad(const QString &fileName)
+void ContentSelectorView::ContentSelector::cloneToFilesToLoad(const QString &fileName)
 {
-    ContentSelectorModel::EsmFile *file = mAllPluginsContentModel->removeEsmFile(fileName);
-    if (file)
+    // if file is already in the FilesToLoad view, nothing to do
+    if (!mLoadPluginsContentModel->item(fileName))
     {
-        mLoadPluginsContentModel->addFile(file);
+        const ContentSelectorModel::EsmFile* file = mAllPluginsContentModel->item(fileName);
+        if (file)
+        {
+            QModelIndexList indexes;
+            indexes.append(mAllPluginsContentModel->indexFromItem(file));
+            QMimeData *mimeData = mAllPluginsContentModel->mimeData(indexes);
+            mLoadPluginsContentModel->dropMimeData(mimeData, -1, QModelIndex());
+        }
     }
 }
 
-void ContentSelectorView::ContentSelector::moveToFilesToNotLoad(const QString &fileName)
+void ContentSelectorView::ContentSelector::removeFromFilesToLoad(const QString &fileName)
 {
-    mAllPluginsContentModel->addFile(mLoadPluginsContentModel->removeEsmFile(fileName));
+    // ToDo: implement
 }
 
 ContentSelectorModel::ContentFileList

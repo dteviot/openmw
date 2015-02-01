@@ -18,6 +18,9 @@ namespace ContentSelectorModel
 
         void addFiles(const QString &path);
 
+        bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+
+        bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex());
     };
 }
 #endif // ALLPLUGINSCONTENTMODEL_HPP
