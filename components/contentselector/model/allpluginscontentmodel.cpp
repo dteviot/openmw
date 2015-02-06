@@ -9,8 +9,10 @@
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::AllPluginsContentModel::AllPluginsContentModel(QObject *parent, QIcon warningIcon) :
-    ContentModel(parent, warningIcon)
+ContentSelectorModel::AllPluginsContentModel::AllPluginsContentModel(QObject *parent, QIcon warningIcon,
+    ContentModel* loadPluginsContentModel) :
+    ContentModel(parent, warningIcon),
+    mLoadPluginsContentModel(loadPluginsContentModel)
 {
 }
 
@@ -79,4 +81,28 @@ bool ContentSelectorModel::AllPluginsContentModel::removeRows(int position, int 
     // nothing to do, will just be someone trying drag & drop an in-use plug-in.
     // no state change required.
     return true;
+}
+
+Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags | Qt::ItemIsDropEnabled;
+
+    const EsmFile *file = item(index.row());
+
+    if (!file)
+        return Qt::NoItemFlags;
+
+    //game files can always be checked
+    if (file->isGameFile())
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    // if item is in the plug-ins to be loaded list, disable it in this list.
+    Qt::ItemFlags returnFlags = 0;
+    if (mLoadPluginsContentModel->item(file->filePath()) == NULL)
+    {
+        returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+
+    return returnFlags | mDragDropFlags;
 }
