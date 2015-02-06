@@ -50,7 +50,6 @@ namespace ContentSelectorModel
         bool isEnabled (QModelIndex index) const;
         bool isChecked(const QString &filepath) const;
         bool setCheckState(const QString &filepath, bool isChecked);
-        ContentFileList checkedItems() const;
         void clearFiles();
 
         void refreshModel();

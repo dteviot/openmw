@@ -419,20 +419,6 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &filepath, 
     return true;
 }
 
-ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checkedItems() const
-{
-    ContentFileList list;
-
-    // TODO:
-    // First search for game files and next addons,
-    // so we get more or less correct game files vs addons order.
-    foreach (EsmFile *file, mFiles)
-        if (isChecked(file->filePath()))
-            list << file;
-
-    return list;
-}
-
 void ContentSelectorModel::ContentModel::clearFiles()
 {
     emit layoutAboutToBeChanged();

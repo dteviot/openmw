@@ -151,10 +151,10 @@ void ContentSelectorView::ContentSelector::removeFromFilesToLoad(const QString &
 ContentSelectorModel::ContentFileList
         ContentSelectorView::ContentSelector::selectedFiles() const
 {
-    if (!mAllPluginsContentModel)
+    if (!mLoadPluginsContentModel)
         return ContentSelectorModel::ContentFileList();
 
-    return mAllPluginsContentModel->checkedItems();
+    return mLoadPluginsContentModel->filesToLoad();
 }
 
 void ContentSelectorView::ContentSelector::addFiles(const QString &path)

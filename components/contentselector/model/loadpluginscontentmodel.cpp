@@ -162,3 +162,13 @@ void ContentSelectorModel::LoadPluginsContentModel::setAllPluginsContentModel(Co
     mAllPluginsContentModel = allPluginsContentModel;
 }
 
+ContentSelectorModel::ContentFileList ContentSelectorModel::LoadPluginsContentModel::filesToLoad() const
+{
+    ContentFileList list;
+    foreach(EsmFile *file, mFiles)
+    {
+        list << file;
+    }
+    return list;
+}
+

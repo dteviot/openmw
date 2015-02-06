@@ -27,6 +27,8 @@ namespace ContentSelectorModel
         /// Provides list of all available files
         void setAllPluginsContentModel(ContentModel *allPluginsContentModel);
 
+        ContentFileList filesToLoad() const;
+
     protected:
         /// Icon to decorate plug-in with in view.
         QVariant getDecoration(const EsmFile *file) const;
