@@ -39,14 +39,14 @@
       <item row="1" column="0" colspan="2">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>All files</string>
+         <string>All plug-in files</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2" colspan="2">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Files in Profile</string>
+         <string>Plug-in files to load</string>
         </property>
        </widget>
       </item>
