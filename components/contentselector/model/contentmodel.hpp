@@ -72,7 +72,7 @@ namespace ContentSelectorModel
         ///  \return true if plug-in has a Load Order error
         bool isLoadOrderError(const EsmFile *file) const;
 
-        QString toolTip(const EsmFile *file) const;
+        virtual QString toolTip(const EsmFile *file) const;
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;

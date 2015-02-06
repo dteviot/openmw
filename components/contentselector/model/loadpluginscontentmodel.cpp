@@ -64,3 +64,26 @@ bool ContentSelectorModel::LoadPluginsContentModel::dropMimeData(const QMimeData
 
     return true;
 }
+
+QString ContentSelectorModel::LoadPluginsContentModel::toolTip(const EsmFile *file) const
+{
+    if (isLoadOrderError(file))
+    {
+        QString text("<b>");
+        int index = indexFromItem(item(file->filePath())).row();
+        foreach(const LoadOrderError& error, checkForLoadOrderErrors(file, index))
+        {
+            text += "<p>";
+            text += error.toolTip();
+            text += "</p>";
+        }
+        text += ("</b>");
+        text += file->toolTip();
+        return text;
+    }
+    else
+    {
+        return file->toolTip();
+    }
+}
+

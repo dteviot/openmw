@@ -18,6 +18,9 @@ namespace ContentSelectorModel
 
         bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
         bool dropMimeData(const QMimeData *data, int row, const QModelIndex &parent);
+
+    protected:
+        virtual QString toolTip(const EsmFile *file) const;
     };
 }
 #endif // LOADPLUGINSCONTENTMODEL_HPP
