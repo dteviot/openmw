@@ -24,6 +24,9 @@ namespace ContentSelectorModel
         /// Checks all plug-ins for load order errors and updates mPluginsWithLoadOrderError with plug-ins with issues
         void checkForLoadOrderErrors();
 
+        /// Provides list of all available files
+        void setAllPluginsContentModel(ContentModel *allPluginsContentModel);
+
     protected:
         /// Icon to decorate plug-in with in view.
         QVariant getDecoration(const EsmFile *file) const;
@@ -39,6 +42,8 @@ namespace ContentSelectorModel
         bool isLoadOrderError(const EsmFile *file) const;
 
         QSet<QString> mPluginsWithLoadOrderError;
+
+        ContentModel *mAllPluginsContentModel;
     };
 }
 #endif // LOADPLUGINSCONTENTMODEL_HPP

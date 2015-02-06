@@ -27,6 +27,7 @@ void ContentSelectorView::ContentSelector::buildContentModel()
     QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
     mLoadPluginsContentModel = new ContentSelectorModel::LoadPluginsContentModel(this, warningIcon);
     mAllPluginsContentModel = new ContentSelectorModel::AllPluginsContentModel(this, warningIcon, mLoadPluginsContentModel);
+    mLoadPluginsContentModel->setAllPluginsContentModel(mAllPluginsContentModel);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()

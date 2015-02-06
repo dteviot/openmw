@@ -137,14 +137,17 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::LoadPluginsCon
 
         if (!dependentFile)
         {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
-        }
-        else
-        {
-            if (!isChecked(dependentFile->filePath()))
+            if (mAllPluginsContentModel->item(dependentfileName))
             {
                 errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
             }
+            else
+            {
+                errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
+            }
+        }
+        else
+        {
             if (row < indexFromItem(dependentFile).row())
             {
                 errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
@@ -154,4 +157,8 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::LoadPluginsCon
     return errors;
 }
 
+void ContentSelectorModel::LoadPluginsContentModel::setAllPluginsContentModel(ContentModel *allPluginsContentModel)
+{
+    mAllPluginsContentModel = allPluginsContentModel;
+}
 
