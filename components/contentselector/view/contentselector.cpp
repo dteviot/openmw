@@ -193,7 +193,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         model->setData(model->index(index, 0), true, Qt::UserRole + 1);
-        mAllPluginsContentModel->checkForLoadOrderErrors();
+        mLoadPluginsContentModel->checkForLoadOrderErrors();
     }
 
     if (proxy)

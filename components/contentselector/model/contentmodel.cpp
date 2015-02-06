@@ -138,7 +138,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     {
     case Qt::DecorationRole:
     {
-        return isLoadOrderError(file) ? mWarningIcon : QVariant();
+        return getDecoration(file);
     }
 
     case Qt::EditRole:
@@ -258,8 +258,6 @@ bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, cons
 
     } endRemoveRows();
 
-    // at this point we know that drag and drop has finished.
-    checkForLoadOrderErrors();
     return true;
 }
 
@@ -352,54 +350,6 @@ bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
     return (flags(index) & Qt::ItemIsEnabled);
 }
 
-bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) const
-{
-    return mPluginsWithLoadOrderError.contains(file->filePath());
-}
-
-void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
-{
-    for (int row = 0; row < mFiles.count(); ++row)
-    {
-        EsmFile* file = item(row);
-        bool isRowInError = checkForLoadOrderErrors(file, row).count() != 0;
-        if (isRowInError)
-        {
-            mPluginsWithLoadOrderError.insert(file->filePath());
-        }
-        else
-        {
-            mPluginsWithLoadOrderError.remove(file->filePath());
-        }
-    }
-}
-
-QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
-{
-    QList<LoadOrderError> errors = QList<LoadOrderError>();
-    foreach(QString dependentfileName, file->gameFiles())
-    {
-        const EsmFile* dependentFile = item(dependentfileName);
-
-        if (!dependentFile)
-        {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
-        }
-        else
-        {
-            if (!isChecked(dependentFile->filePath()))
-            {
-                errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
-            }
-            if (row < indexFromItem(dependentFile).row())
-            {
-                errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
-            }
-        }
-    }
-    return errors;
-}
-
 QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
 {
     return file->toolTip();
@@ -489,4 +439,9 @@ void ContentSelectorModel::ContentModel::clearFiles()
     qDeleteAll(mFiles);
     mFiles.clear();
     emit layoutChanged();
+}
+
+QVariant ContentSelectorModel::ContentModel::getDecoration(const EsmFile *file) const
+{
+    return QVariant();
 }

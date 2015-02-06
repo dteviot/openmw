@@ -55,9 +55,6 @@ namespace ContentSelectorModel
 
         void refreshModel();
 
-        /// Checks all plug-ins for load order errors and updates mPluginsWithLoadOrderError with plug-ins with issues
-        void checkForLoadOrderErrors();
-
     protected:
 
         const EsmFile *item(int row) const;
@@ -65,18 +62,13 @@ namespace ContentSelectorModel
 
         void sortFiles();
 
-        /// Checks a specific plug-in for load order errors
-        /// \return all errors found for specific plug-in
-        QList<LoadOrderError> checkForLoadOrderErrors(const EsmFile *file, int row) const;
-
-        ///  \return true if plug-in has a Load Order error
-        bool isLoadOrderError(const EsmFile *file) const;
+        /// Icon to decorate plug-in with in view.
+        virtual QVariant getDecoration(const EsmFile *file) const;
 
         virtual QString toolTip(const EsmFile *file) const;
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
-        QSet<QString> mPluginsWithLoadOrderError;
         QTextCodec *mCodec;
         QString mEncoding;
         QIcon mWarningIcon;
