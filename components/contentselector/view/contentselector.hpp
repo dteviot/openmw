@@ -37,6 +37,7 @@ namespace ContentSelectorView
         void clearFiles();
         void setContentList(const QStringList &list);
         void cloneToFilesToLoad(const QString &fileName);
+        void cloneToFilesToLoad(const QModelIndex &index);
         void removeFromFilesToLoad(const QString &fileName);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;

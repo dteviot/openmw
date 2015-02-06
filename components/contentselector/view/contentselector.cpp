@@ -135,12 +135,17 @@ void ContentSelectorView::ContentSelector::cloneToFilesToLoad(const QString &fil
         const ContentSelectorModel::EsmFile* file = mAllPluginsContentModel->item(fileName);
         if (file)
         {
-            QModelIndexList indexes;
-            indexes.append(mAllPluginsContentModel->indexFromItem(file));
-            QMimeData *mimeData = mAllPluginsContentModel->mimeData(indexes);
-            mLoadPluginsContentModel->dropMimeData(mimeData, -1, QModelIndex());
+            cloneToFilesToLoad(mAllPluginsContentModel->indexFromItem(file));
         }
     }
+}
+
+void ContentSelectorView::ContentSelector::cloneToFilesToLoad(const QModelIndex &index)
+{
+    QModelIndexList indexes;
+    indexes.append(index);
+    QMimeData *mimeData = mAllPluginsContentModel->mimeData(indexes);
+    mLoadPluginsContentModel->dropMimeData(mimeData, -1, QModelIndex());
 }
 
 void ContentSelectorView::ContentSelector::removeFromFilesToLoad(const QString &fileName)
@@ -194,7 +199,8 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         model->setData(model->index(index, 0), true, Qt::UserRole + 1);
-        mLoadPluginsContentModel->checkForLoadOrderErrors();
+        mLoadPluginsContentModel->clearFiles();
+        cloneToFilesToLoad(model->index(index, 0));
     }
 
     if (proxy)
