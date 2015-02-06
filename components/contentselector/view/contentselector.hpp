@@ -70,6 +70,11 @@ namespace ContentSelectorView
 
         void slotCurrentGameFileIndexChanged(int index);
         void slotAddonTableItemActivated(const QModelIndex& index);
+        void slotOnAddToFilesToLoad();
+        void slotOnRemoveFromFilesToLoad();
+        void slotOnAddToFilesToLoadDoubleClick(const QModelIndex &index);
+        void slotOnRemoveFromFilesToLoadDoubleClick(const QModelIndex &index);
+
     };
 }
 

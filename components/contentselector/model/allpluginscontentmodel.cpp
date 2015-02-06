@@ -88,7 +88,7 @@ Qt::ItemFlags ContentSelectorModel::AllPluginsContentModel::flags(const QModelIn
     if (!index.isValid())
         return Qt::NoItemFlags | Qt::ItemIsDropEnabled;
 
-    const EsmFile *file = item(index.row());
+    const EsmFile *file = itemAsConst(index.row());
 
     if (!file)
         return Qt::NoItemFlags;

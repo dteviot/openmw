@@ -59,7 +59,7 @@ int ContentSelectorModel::ContentModel::rowCount(const QModelIndex &parent) cons
     return mFiles.size();
 }
 
-const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::itemAsConst(int row) const
 {
     if (row >= 0 && row < mFiles.size())
         return mFiles.at(row);
@@ -105,7 +105,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!index.isValid())
         return Qt::NoItemFlags | Qt::ItemIsDropEnabled;
 
-    const EsmFile *file = item(index.row());
+    const EsmFile *file = itemAsConst(index.row());
 
     if (!file)
         return Qt::NoItemFlags;
@@ -127,7 +127,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     if (index.row() >= mFiles.size())
         return QVariant();
 
-    const EsmFile *file = item(index.row());
+    const EsmFile *file = itemAsConst(index.row());
 
     if (!file)
         return QVariant();
@@ -280,7 +280,7 @@ QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &i
         if (!index.isValid())
             continue;
 
-        encodedData.append(item(index.row())->encodedData());
+        encodedData.append(itemAsConst(index.row())->encodedData());
     }
 
     QMimeData *mimeData = new QMimeData();
@@ -430,4 +430,9 @@ void ContentSelectorModel::ContentModel::clearFiles()
 QVariant ContentSelectorModel::ContentModel::getDecoration(const EsmFile *file) const
 {
     return QVariant();
+}
+
+void ContentSelectorModel::ContentModel::emitDataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight)
+{
+    emit dataChanged(topLeft, bottomRight);
 }

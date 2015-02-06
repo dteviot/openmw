@@ -53,10 +53,16 @@ namespace ContentSelectorModel
         void clearFiles();
 
         void refreshModel();
+        
+        /// Used to tell model that things have changed without it's notice.  (Ugly!!!)
+        /// Done this way because adding/removing a file to the "files to load" list 
+        /// alters the state of the "all files" list.
+        void emitDataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight);
+
+        const EsmFile *itemAsConst(int row) const;
 
     protected:
 
-        const EsmFile *item(int row) const;
         EsmFile *item(int row);
 
         void sortFiles();

@@ -54,10 +54,16 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     ui.addonView->setVisible (true);
 
     mAllPluginsProxyModel = CreateProxy(ui.addonView, mAllPluginsContentModel);
-    mLoadPluginsProxyModel = CreateProxy(ui.addonView2, mLoadPluginsContentModel);
+    mLoadPluginsProxyModel = CreateProxy(ui.pluginsToLoadView, mLoadPluginsContentModel);
 
     connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
     connect(mAllPluginsContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
+
+    connect(ui.addToFilesToLoadButton, SIGNAL(clicked()), this, SLOT(slotOnAddToFilesToLoad()));
+    connect(ui.removeFromFilesToLoadButton, SIGNAL(clicked()), this, SLOT(slotOnRemoveFromFilesToLoad()));
+
+    connect(ui.addonView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(slotOnAddToFilesToLoadDoubleClick(const QModelIndex &)));
+    connect(ui.pluginsToLoadView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(slotOnRemoveFromFilesToLoadDoubleClick(const QModelIndex &)));
 }
 
 QSortFilterProxyModel* ContentSelectorView::ContentSelector::CreateProxy(QTableView* tableView, QAbstractTableModel* contentModel)
@@ -223,3 +229,44 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QMo
 
     mAllPluginsContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
 }
+
+void ContentSelectorView::ContentSelector::slotOnAddToFilesToLoad()
+{
+    QModelIndexList selected = ui.addonView->selectionModel()->selectedRows();
+    if (0 < selected.size())
+    {
+        QModelIndex sourceIndex = mAllPluginsProxyModel->mapToSource(selected[0]);
+        cloneToFilesToLoad(sourceIndex);
+        mAllPluginsContentModel->emitDataChanged(sourceIndex, sourceIndex);
+    }
+}
+
+void ContentSelectorView::ContentSelector::slotOnRemoveFromFilesToLoad()
+{
+    QModelIndexList selected = ui.pluginsToLoadView->selectionModel()->selectedRows();
+    if (0 < selected.size())
+    {
+        QModelIndex sourceIndex = mLoadPluginsProxyModel->mapToSource(selected[0]);
+
+        // fetch the plug-in's name, so we can tell allPlugins list to update itself
+        QString filePath = mLoadPluginsContentModel->itemAsConst(sourceIndex.row())->filePath();
+
+        mLoadPluginsContentModel->removeRows(sourceIndex.row(), 1, QModelIndex());
+
+        // update allPlugins
+        QModelIndex indexToUpdate = mAllPluginsContentModel->indexFromItem(mAllPluginsContentModel->item(filePath));
+        mAllPluginsContentModel->emitDataChanged(indexToUpdate, indexToUpdate);
+    }
+}
+
+void ContentSelectorView::ContentSelector::slotOnAddToFilesToLoadDoubleClick(const QModelIndex & /* index */)
+{
+    slotOnAddToFilesToLoad();
+}
+
+void ContentSelectorView::ContentSelector::slotOnRemoveFromFilesToLoadDoubleClick(const QModelIndex & /* index */)
+{
+    slotOnRemoveFromFilesToLoad();
+}
+
+
