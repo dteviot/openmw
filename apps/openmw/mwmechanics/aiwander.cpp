@@ -503,47 +503,53 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
             {
-                assert(mAllowedNodes.size());
-                unsigned int randNode = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
-                // NOTE: initially constructed with local (i.e. cell) co-ordinates
-                Ogre::Vector3 destNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[randNode]));
-
-                // convert dest to use world co-ordinates
-                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(destNodePos));
-                if (currentCell->getCell()->isExterior())
-                {
-                    dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
-                    dest.mY += currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
-                }
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-                // don't take shortcuts for wandering
-                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
-
-                if(storage.mPathFinder.isPathConstructed())
-                {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
-                    ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-                    // check if mCurrentNode was taken out of mAllowedNodes
-                    if(mTrimCurrentNode && mAllowedNodes.size() > 1)
-                        mTrimCurrentNode = false;
-                    else
-                        mAllowedNodes.push_back(mCurrentNode);
-                    mCurrentNode = temp;
-
-                    moveNow = false;
-                    walking = true;
-                }
-                // Choose a different node and delete this one from possible nodes because it is uncreachable:
-                else
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+                setPathToAllowedNode(actor, storage, pos);
             } 
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::setPathToAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position actorPos)
+    {
+        assert(mAllowedNodes.size());
+        unsigned int randNode = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
+        // NOTE: initially constructed with local (i.e. cell) co-ordinates
+        Ogre::Vector3 destNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[randNode]));
+
+        // convert dest to use world co-ordinates
+        ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(destNodePos));
+        const MWWorld::CellStore*& currentCell = storage.mCell;
+        if (currentCell->getCell()->isExterior())
+        {
+            dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+            dest.mY += currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+        }
+
+        // actor position is already in world co-ordinates
+        ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
+
+        // don't take shortcuts for wandering
+        storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
+
+        if (storage.mPathFinder.isPathConstructed())
+        {
+            // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+            ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+            // check if mCurrentNode was taken out of mAllowedNodes
+            if (mTrimCurrentNode && mAllowedNodes.size() > 1)
+                mTrimCurrentNode = false;
+            else
+                mAllowedNodes.push_back(mCurrentNode);
+            mCurrentNode = temp;
+
+            storage.mMoveNow = false;
+            storage.mWalking = true;
+        }
+        // Choose a different node and delete this one from possible nodes because it is uncreachable:
+        else
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,

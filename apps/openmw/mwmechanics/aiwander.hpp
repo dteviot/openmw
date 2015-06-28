@@ -77,6 +77,9 @@ namespace MWMechanics
             /// populate mAllowedNodes with all pathgrid points within specified distance of NPC's location
             void pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, int distance);
 
+            /// set path for NPC to travel to one of the nodes in mAllowedNodes
+            void AiWander::setPathToAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position actorPos);
+
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;
