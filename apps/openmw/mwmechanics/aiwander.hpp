@@ -80,6 +80,9 @@ namespace MWMechanics
             /// set path for NPC to travel to one of the nodes in mAllowedNodes
             void AiWander::setPathToAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position actorPos);
 
+            /// pick a point to wander too, that is mDistance away from NPC's initial location
+            void AiWander::setPathToRandomDestination(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;

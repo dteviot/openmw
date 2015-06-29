@@ -217,7 +217,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], 64.f))
+           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
         {
             stopWalking(actor, storage);
             moveNow = false;
@@ -389,10 +389,6 @@ namespace MWMechanics
             getAllowedNodes(actor, currentCell->getCell());
         }
 
-        // Actor becomes stationary - see above URL's for previous research
-        if(mAllowedNodes.empty())
-            mDistance = 0;
-
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
         if(mDistance && cellChange)
             mDistance = 0;
@@ -503,7 +499,14 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
             {
-                setPathToAllowedNode(actor, storage, pos);
+                if (mAllowedNodes.size())
+                {
+                    setPathToAllowedNode(actor, storage, pos);
+                }
+                else
+                {
+                    setPathToRandomDestination(actor, storage);
+                }
             } 
         }
 
@@ -550,6 +553,46 @@ namespace MWMechanics
         // Choose a different node and delete this one from possible nodes because it is uncreachable:
         else
             mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+    }
+
+    void AiWander::setPathToRandomDestination(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+        // pick random direction to move in.
+        float angle = OEngine::Misc::Rng::rollProbability() * Ogre::Math::TWO_PI;
+        ESM::Position endPos;
+
+        // destination must be far enough away that NPC will need to move to get there.
+        const float threshold = 64.0f;
+        float distance = std::max(static_cast<float>(mDistance), threshold);
+
+        while (threshold <= distance)
+        {
+            endPos.pos[0] = mInitialActorPosition[0] + std::sin(angle) * distance;
+            endPos.pos[1] = mInitialActorPosition[1] + std::cos(angle) * distance;
+            endPos.pos[2] = mInitialActorPosition[2] + 64;  // allow for small obstacles
+
+            if (MWBase::Environment::get().getWorld()->castRay(
+                mInitialActorPosition[0], mInitialActorPosition[1], mInitialActorPosition[2],
+                endPos.pos[0], endPos.pos[1], endPos.pos[2]))
+            {
+                // something in way, try shorter distance
+                distance /= 2;
+            }
+            else
+            {
+                // don't want fish and birds to change height
+                endPos.pos[2] = mInitialActorPosition[2];
+
+                storage.mPathFinder.buildSyncedPath(PathFinder::MakePathgridPoint(mInitialActorPosition),
+                    PathFinder::MakePathgridPoint(endPos), actor.getCell(), true);
+                if (storage.mPathFinder.isPathConstructed())
+                {
+                    storage.mMoveNow = false;
+                    storage.mWalking = true;
+                    break;
+                }
+            }
+        }
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
