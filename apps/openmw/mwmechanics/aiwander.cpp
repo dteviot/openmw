@@ -714,7 +714,7 @@ namespace MWMechanics
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
-            pointsWithinDistance(npcPos, pathgrid, mDistance);
+            pointsWithinDistance(npcPos, pathgrid, static_cast<float>(mDistance));
 
             // In vanilla Morrowind, sometimes distance is too small to include at least two points. (Bug #1317)
             // in which case, see if we can get two points by increasing wander distance by 50%.
@@ -726,7 +726,7 @@ namespace MWMechanics
             const int minExpandWanderDistance = 256;
             if ((mAllowedNodes.size() == 1) && (minExpandWanderDistance <= mDistance))
             {
-                pointsWithinDistance(npcPos, pathgrid, mDistance + (mDistance / 2));
+                pointsWithinDistance(npcPos, pathgrid, static_cast<float>(mDistance + (mDistance / 2)));
             }
 
             if(!mAllowedNodes.empty())
@@ -749,7 +749,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, int distance)
+    void AiWander::pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, float distance)
     {
         float distanceSquared = distance * distance;
         for (unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)

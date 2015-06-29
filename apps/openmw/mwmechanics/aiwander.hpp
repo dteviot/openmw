@@ -75,7 +75,7 @@ namespace MWMechanics
             void getRandomIdle(unsigned short& playedIdle);
 
             /// populate mAllowedNodes with all pathgrid points within specified distance of NPC's location
-            void pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, int distance);
+            void pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, float distance);
 
             /// set path for NPC to travel to one of the nodes in mAllowedNodes
             void AiWander::setPathToAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position actorPos);
